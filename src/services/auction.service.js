@@ -1,62 +1,55 @@
-// In frontend/src/services/auction.service.js
+// frontend/src/services/auction.service.js
 
 import axios from 'axios';
 
-// Our proxy in vite.config.js will handle the base URL
-const API_URL = '/api/auctions/';
+// Use environment variable in production; fall back to Vite proxy in dev
+const API_BASE = import.meta.env.VITE_API_URL
+  ? `${import.meta.env.VITE_API_URL}/api/auctions/`
+  : `/api/auctions/`;
 
 // Get all active auctions (for homepage)
 const getActiveAuctions = async () => {
-  const response = await axios.get(API_URL);
+  const response = await axios.get(API_BASE);
   return response.data;
 };
 
 // Get a single auction by ID
 const getAuctionById = async (id) => {
-  const response = await axios.get(API_URL + id);
+  const response = await axios.get(API_BASE + id);
   return response.data;
 };
 
-// --- We will add more functions here later ---
-// createAuction
-// placeBid
-// getPendingAuctions
-// approveAuction
-
+// Place a bid on an auction
 const placeBid = async (auctionId, amount) => {
-  // We need to be logged in, but the AuthContext/axios header handles sending the token
-  const response = await axios.post(API_URL + `${auctionId}/bids`, { amount });
+  const response = await axios.post(API_BASE + `${auctionId}/bids`, { amount });
   return response.data;
 };
 
+// Create a new auction
 const createAuction = async (auctionData) => {
-  // auctionData = { title, description, startPrice, startTime, endTime }
-  // Token is sent automatically from AuthContext
-  const response = await axios.post(API_URL, auctionData);
+  const response = await axios.post(API_BASE, auctionData);
   return response.data;
 };
 
 // Get all pending auctions (Admin only)
 const getPendingAuctions = async () => {
-  const response = await axios.get(API_URL + 'admin/pending');
+  const response = await axios.get(API_BASE + 'admin/pending');
   return response.data;
 };
 
 // Approve an auction (Admin only)
 const approveAuction = async (id) => {
-  const response = await axios.put(API_URL + `admin/approve/${id}`);
+  const response = await axios.put(API_BASE + `admin/approve/${id}`);
   return response.data;
 };
 
-// --- UPDATE YOUR EXPORTS AT THE BOTTOM ---
 const auctionService = {
   getActiveAuctions,
   getAuctionById,
   placeBid,
-  createAuction,      // <-- ADD THIS
-  getPendingAuctions, // <-- ADD THIS
-  approveAuction,     // <-- ADD THIS
+  createAuction,
+  getPendingAuctions,
+  approveAuction,
 };
 
 export default auctionService;
-
