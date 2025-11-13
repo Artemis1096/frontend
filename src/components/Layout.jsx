@@ -9,8 +9,17 @@ const Layout = () => {
   return (
     <>
       <Navbar />
-      <Container component="main" sx={{ mt: 4, mb: 4 }}>
-        <Outlet /> 
+      <Container
+        component="main"
+        maxWidth={false}
+        sx={{
+          mt: 2,
+          mb: 4,
+          minHeight: 'calc(100vh - 100px)',
+          px: { xs: 2, sm: 3, md: 4 },
+        }}
+      >
+        <Outlet />
       </Container>
     </>
   );

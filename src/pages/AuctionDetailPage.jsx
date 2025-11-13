@@ -1,6 +1,6 @@
 // In frontend/src/pages/AuctionDetailPage.jsx
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Fragment } from 'react';
 import { useParams, Link as RouterLink } from 'react-router-dom';
 import auctionService from '../services/auction.service';
 import { useAuth } from '../context/AuthContext';
@@ -21,7 +21,10 @@ import {
   Divider,
 } from '@mui/material';
 import GavelIcon from '@mui/icons-material/Gavel';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import PersonIcon from '@mui/icons-material/Person';
 import { format } from 'date-fns';
+import Badge from '../components/Badge';
 
 const AuctionDetailPage = () => {
   const { id } = useParams(); // Get auction ID from URL
@@ -126,107 +129,321 @@ const AuctionDetailPage = () => {
   const winner = auction.bids.length > 0 ? auction.bids[auction.bids.length - 1] : null;
 
   return (
-    <Container>
-      <Typography variant="h3" component="h1" gutterBottom>
-        {auction.title}
-      </Typography>
+    <Container maxWidth="lg" className="page-transition">
+      {/* Header */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          variant="h3"
+          component="h1"
+          gutterBottom
+          sx={{
+            fontWeight: 700,
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 1,
+          }}
+        >
+          {auction.title}
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+          {isAuctionEnded && <Badge label="Auction Ended" type="ended" />}
+          {isAuctionActive && !isAuctionEnded && (
+            <Badge label="Active" type="new" />
+          )}
+        </Box>
+      </Box>
 
       <Grid container spacing={4}>
         {/* Left Side: Image & Description */}
         <Grid item xs={12} md={7}>
-          <Box
-            component="img"
-            src={auction.imageUrl}
-            alt={auction.title}
-            sx={{ width: '100%', height: 'auto', borderRadius: 2 }}
-          />
-          <Typography variant="h6" sx={{ mt: 2 }}>Description</Typography>
-          <Typography variant="body1">{auction.description}</Typography>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 2,
+              borderRadius: 3,
+              backgroundColor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              mb: 3,
+            }}
+          >
+            <Box
+              component="img"
+              src={auction.imageUrl}
+              alt={auction.title}
+              sx={{
+                width: '100%',
+                height: 'auto',
+                borderRadius: 2,
+                display: 'block',
+                maxHeight: '600px',
+                objectFit: 'contain',
+              }}
+            />
+          </Paper>
+
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              borderRadius: 3,
+              backgroundColor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Typography
+              variant="h5"
+              sx={{ fontWeight: 600, mb: 2, color: 'text.primary' }}
+            >
+              Description
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ lineHeight: 1.8, color: 'text.secondary' }}
+            >
+              {auction.description}
+            </Typography>
+          </Paper>
         </Grid>
 
         {/* Right Side: Bidding Box & Info */}
         <Grid item xs={12} md={5}>
-          <Paper elevation={3} sx={{ p: 3 }}>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 4,
+              borderRadius: 3,
+              backgroundColor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+              position: 'sticky',
+              top: 100,
+            }}
+          >
             
             {/* --- 1. Auction Ended View --- */}
             {isAuctionEnded && (
               <Box>
-                <Typography variant="h4" color="error" gutterBottom>Auction Ended</Typography>
+                <Box
+                  sx={{
+                    textAlign: 'center',
+                    mb: 3,
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: 'error.light',
+                    color: 'white',
+                  }}
+                >
+                  <Typography variant="h5" fontWeight={700} gutterBottom>
+                    Auction Ended
+                  </Typography>
+                </Box>
                 {winner ? (
                   <>
-                    <Typography variant="h6">Winner:</Typography>
-                    <Typography variant="h5" color="primary">{winner.bidder.email}</Typography>
-                    <Typography variant="h6" sx={{ mt: 2 }}>Winning Bid:</Typography>
-                    <Typography variant="h5" color="primary">${auction.currentPrice.toFixed(2)}</Typography>
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Winner
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          p: 2,
+                          borderRadius: 2,
+                          backgroundColor: 'primary.light',
+                          color: 'white',
+                        }}
+                      >
+                        <PersonIcon />
+                        <Typography variant="h6" fontWeight={600}>
+                          {winner.bidder.email}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Box sx={{ mb: 3 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Winning Bid
+                      </Typography>
+                      <Typography
+                        variant="h3"
+                        color="primary"
+                        sx={{
+                          fontWeight: 700,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                        }}
+                      >
+                        <GavelIcon sx={{ fontSize: 32 }} />
+                        ${auction.currentPrice.toFixed(2)}
+                      </Typography>
+                    </Box>
+                    {user && winner && user._id === winner.bidder._id && (
+                      <Button
+                        variant="contained"
+                        color="success"
+                        fullWidth
+                        size="large"
+                        sx={{
+                          mt: 2,
+                          py: 1.5,
+                          borderRadius: 2,
+                          fontWeight: 600,
+                        }}
+                      >
+                        Proceed to Pay (Simulation)
+                      </Button>
+                    )}
                   </>
                 ) : (
-                  <Typography variant="h6">This auction ended with no bids.</Typography>
-                )}
-                
-                {/* Simulated Payment Button */}
-                {user && winner && user._id === winner.bidder._id && (
-                  <Button variant="contained" color="success" sx={{ mt: 3 }} fullWidth>
-                    Proceed to Pay (Simulation)
-                  </Button>
+                  <Typography variant="h6" color="text.secondary" align="center">
+                    This auction ended with no bids.
+                  </Typography>
                 )}
               </Box>
             )}
 
             {/* --- 2. Auction Pending/Inactive View --- */}
             {!isAuctionActive && !isAuctionEnded && (
-               <Typography variant="h5" color="text.secondary">
-                 This auction is not yet active.
-               </Typography>
+              <Box sx={{ textAlign: 'center', py: 4 }}>
+                <Typography variant="h6" color="text.secondary">
+                  This auction is not yet active.
+                </Typography>
+              </Box>
             )}
 
             {/* --- 3. Auction Active View --- */}
             {isAuctionActive && (
               <Box>
-                <Typography variant="h4" gutterBottom>
-                  Current Bid: ${auction.currentPrice.toFixed(2)}
-                </Typography>
-                <Typography variant="body1" color="text.secondary" gutterBottom>
-                  Ends: {format(new Date(auction.endTime), "PPpp")}
-                </Typography>
-                
-                <Box component="form" onSubmit={handleBidSubmit} sx={{ mt: 3 }}>
+                {/* Current Bid Display */}
+                <Box
+                  sx={{
+                    textAlign: 'center',
+                    mb: 3,
+                    p: 3,
+                    borderRadius: 2,
+                    background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                    color: 'white',
+                  }}
+                >
+                  <Typography variant="body2" sx={{ opacity: 0.9, mb: 1 }}>
+                    Current Bid
+                  </Typography>
+                  <Typography
+                    variant="h3"
+                    sx={{
+                      fontWeight: 700,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: 1,
+                    }}
+                  >
+                    <GavelIcon sx={{ fontSize: 32 }} />
+                    ${auction.currentPrice.toFixed(2)}
+                  </Typography>
+                </Box>
+
+                {/* Time Left */}
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1,
+                    mb: 3,
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: 'background.default',
+                  }}
+                >
+                  <AccessTimeIcon color="primary" />
+                  <Box>
+                    <Typography variant="caption" color="text.secondary">
+                      Ends on
+                    </Typography>
+                    <Typography variant="body2" fontWeight={600}>
+                      {format(new Date(auction.endTime), "PPpp")}
+                    </Typography>
+                  </Box>
+                </Box>
+
+                {/* Bidding Form */}
+                <Box component="form" onSubmit={handleBidSubmit}>
                   <TextField
-                    label={`Min Bid: $${(auction.currentPrice + getMinBidIncrement(auction.currentPrice)).toFixed(2)}`}
+                    label={`Minimum Bid: $${(auction.currentPrice + getMinBidIncrement(auction.currentPrice)).toFixed(2)}`}
                     variant="outlined"
                     fullWidth
                     type="number"
                     value={bidAmount}
                     onChange={(e) => setBidAmount(e.target.value)}
                     disabled={isSeller}
+                    sx={{
+                      mb: 2,
+                      '& .MuiOutlinedInput-root': {
+                        fontSize: '1.1rem',
+                        fontWeight: 600,
+                      },
+                    }}
+                    InputProps={{
+                      startAdornment: (
+                        <Typography sx={{ mr: 1, color: 'text.secondary' }}>$</Typography>
+                      ),
+                    }}
                   />
-                  
+
                   {isSeller && (
-                    <Alert severity="info" sx={{ mt: 1 }}>You cannot bid on your own auction.</Alert>
+                    <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
+                      You cannot bid on your own auction.
+                    </Alert>
                   )}
-                  
+
                   {bidError && (
-                    <Alert severity="error" sx={{ mt: 2 }}>{bidError}</Alert>
+                    <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                      {bidError}
+                    </Alert>
                   )}
-                  
+
                   {!user && (
-                    <Button 
-                      variant="contained" 
-                      fullWidth 
-                      sx={{ mt: 2 }}
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      size="large"
                       component={RouterLink}
                       to={`/login?redirect=/auction/${id}`}
+                      sx={{
+                        py: 1.5,
+                        borderRadius: 2,
+                        fontWeight: 600,
+                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+                        },
+                      }}
                     >
                       Login to Place Bid
                     </Button>
                   )}
 
                   {user && !isSeller && (
-                    <Button 
-                      type="submit" 
-                      variant="contained" 
-                      fullWidth 
-                      sx={{ mt: 2 }}
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      fullWidth
                       size="large"
+                      sx={{
+                        py: 1.5,
+                        borderRadius: 2,
+                        fontWeight: 600,
+                        background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+                        '&:hover': {
+                          background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+                          transform: 'translateY(-2px)',
+                          boxShadow: '0 6px 20px rgba(99, 102, 241, 0.4)',
+                        },
+                      }}
                     >
                       Place Bid
                     </Button>
@@ -238,24 +455,84 @@ const AuctionDetailPage = () => {
           </Paper>
 
           {/* Bid History */}
-          <Paper elevation={3} sx={{ p: 3, mt: 3 }}>
-            <Typography variant="h6">Bid History</Typography>
-            <Divider sx={{ my: 1 }} />
-            <List>
+          <Paper
+            elevation={0}
+            sx={{
+              p: 3,
+              mt: 3,
+              borderRadius: 3,
+              backgroundColor: 'background.paper',
+              border: '1px solid',
+              borderColor: 'divider',
+            }}
+          >
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
+              Bid History
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            <List sx={{ p: 0 }}>
               {auction.bids.length === 0 && (
                 <ListItem>
-                  <ListItemText primary="No bids yet. Be the first!" />
+                  <ListItemText
+                    primary="No bids yet. Be the first!"
+                    primaryTypographyProps={{
+                      color: 'text.secondary',
+                      fontStyle: 'italic',
+                    }}
+                  />
                 </ListItem>
               )}
               {/* Show bids in reverse order (newest first) */}
-              {[...auction.bids].reverse().map((bid) => (
-                <ListItem key={bid._id}>
-                  <ListItemIcon><GavelIcon /></ListItemIcon>
-                  <ListItemText 
-                    primary={`$${bid.amount.toFixed(2)}`}
-                    secondary={`by ${bid.bidder.email} at ${format(new Date(bid.bidTime), 'p, MMM d')}`}
-                  />
-                </ListItem>
+              {[...auction.bids].reverse().map((bid, index) => (
+                <Fragment key={bid._id}>
+                  <ListItem
+                    sx={{
+                      borderRadius: 2,
+                      mb: 1,
+                      backgroundColor: index === 0 ? 'primary.light' : 'transparent',
+                      color: index === 0 ? 'white' : 'inherit',
+                      '&:hover': {
+                        backgroundColor: index === 0 ? 'primary.main' : 'action.hover',
+                      },
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <ListItemIcon sx={{ color: index === 0 ? 'white' : 'primary.main' }}>
+                      <GavelIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: 600,
+                            color: index === 0 ? 'white' : 'primary.main',
+                          }}
+                        >
+                          ${bid.amount.toFixed(2)}
+                          {index === 0 && (
+                            <Box component="span" sx={{ ml: 1, display: 'inline-block' }}>
+                              <Badge
+                                label="Highest"
+                                type="highest-bidder"
+                                className="pulse-badge"
+                              />
+                            </Box>
+                          )}
+                        </Typography>
+                      }
+                      secondary={
+                        <Typography
+                          variant="body2"
+                          sx={{ color: index === 0 ? 'rgba(255,255,255,0.8)' : 'text.secondary' }}
+                        >
+                          by {bid.bidder.email} • {format(new Date(bid.bidTime), 'MMM d, h:mm a')}
+                        </Typography>
+                      }
+                    />
+                  </ListItem>
+                  {index < auction.bids.length - 1 && <Divider />}
+                </Fragment>
               ))}
             </List>
           </Paper>

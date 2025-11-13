@@ -9,6 +9,7 @@ import {
   Typography,
   CircularProgress,
   Alert,
+  Box,
 } from '@mui/material';
 
 const HomePage = () => {
@@ -35,33 +36,87 @@ const HomePage = () => {
   }, []); // Empty dependency array means this runs once on mount
 
   return (
-    <Container>
-      <Typography variant="h3" component="h1" gutterBottom align="center">
-        Active Auctions
-      </Typography>
+    <Container maxWidth="xl" className="page-transition">
+      {/* Header Section */}
+      <Box
+        sx={{
+          textAlign: 'center',
+          mb: 6,
+          py: 4,
+        }}
+      >
+        <Typography
+          variant="h2"
+          component="h1"
+          gutterBottom
+          sx={{
+            fontWeight: 700,
+            background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            mb: 2,
+          }}
+        >
+          Active Auctions
+        </Typography>
+        <Typography variant="h6" color="text.secondary" sx={{ maxWidth: 600, mx: 'auto' }}>
+          Discover unique items and place your bids. Find something special today!
+        </Typography>
+      </Box>
 
+      {/* Loading State */}
       {loading && (
-        <Grid container justifyContent="center">
-          <CircularProgress />
-        </Grid>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '400px',
+          }}
+        >
+          <CircularProgress size={60} thickness={4} />
+        </Box>
       )}
 
+      {/* Error State */}
       {error && (
-        <Alert severity="error" sx={{ mt: 2 }}>
+        <Alert
+          severity="error"
+          sx={{
+            mt: 2,
+            borderRadius: 2,
+            '& .MuiAlert-message': {
+              width: '100%',
+            },
+          }}
+        >
           {error}
         </Alert>
       )}
 
+      {/* Empty State */}
       {!loading && !error && auctions.length === 0 && (
-        <Typography variant="h6" align="center" sx={{ mt: 4 }}>
-          No active auctions found. Check back later!
-        </Typography>
+        <Box
+          sx={{
+            textAlign: 'center',
+            py: 8,
+            px: 2,
+          }}
+        >
+          <Typography variant="h5" color="text.secondary" gutterBottom>
+            No active auctions found
+          </Typography>
+          <Typography variant="body1" color="text.secondary">
+            Check back later for new listings!
+          </Typography>
+        </Box>
       )}
 
+      {/* Auctions Grid */}
       {!loading && !error && auctions.length > 0 && (
-        <Grid container spacing={4}>
+        <Grid container spacing={3}>
           {auctions.map((auction) => (
-            <Grid item key={auction._id} xs={12} sm={6} md={4}>
+            <Grid item key={auction._id} xs={12} sm={6} md={4} lg={3}>
               <AuctionCard auction={auction} />
             </Grid>
           ))}
